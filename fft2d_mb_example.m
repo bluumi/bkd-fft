@@ -115,7 +115,7 @@ F=fft(b_cut_rad(:,lenkis));
     F=F/max(F);
 Fr=(-N/2:N/2-1)*length(b_cut(:,1))/N;
 figure('Name', 'FFT of RT'),
-    plot(Fr,abs(fftshift(F)),'LineWidth',1.25)
+    plot(Fr-Fr(round(N/2)),abs(fftshift(F)),'LineWidth',1.25)
     ylim([0 1.1])
     grid on, grid minor
     xlabel(['pixels']), ylabel('Amplitude')

@@ -40,15 +40,34 @@ imshow(f_cut_rad, [],'Xdata',theta,'Ydata',xp,'InitialMagnification','fit')
 axis normal
 xlabel('\theta (degrees)')
 ylabel('L')
-% 
-% f_cut_irad=iradon(f_cut_rad,0:180);
-% figure;
-% imshow(f_cut_irad);
 
-% figure(4);
-% for i=182
-% plot(0:180,f_cut_rad(i,:));
-% end
+prompt = 'izpluduma lenkis: ';
+lenkis = input(prompt);
+    if lenkis == 0
+        lenkis = 1;
+    elseif lenkis == 45
+        lenkis = lenkis + 1;
+    end
+
+figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
+plot(-(length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2,f_cut_rad(:,lenkis),'LineWidth', 1.25)
+    xlim([-(length(f_cut_rad)-1)/2 (length(f_cut_rad)-1)/2])
+    xticks([-(length(f_cut_rad)-1)/2 0 (length(f_cut_rad)-1)/2])
+    grid on, grid minor
+    ylim([0 1.1])
+    xlabel(['pixels']), ylabel('Amplitude')
+    
+N=length((f_cut_rad(:,lenkis)));
+F=fft(f_cut_rad(:,lenkis));
+    F=F-min(F);
+    F=F/max(F);
+Fr=(-N/2:N/2-1)*length(f_cut(:,1))/N;
+figure('Name', 'FFT of RT'),
+    plot(Fr-Fr(round(N/2)),abs(fftshift(F)),'LineWidth',1.25)
+    ylim([0 1.1])
+    grid on, grid minor
+    xlabel(['pixels']), ylabel('Amplitude')
+
 
 % SUBPLOTS KOPIGAM SKATAM:
 subplot1=figure;
