@@ -32,8 +32,16 @@ f_cut_fft = fft2(f_cut_win);
 log_f_cut = log(1+abs(fftshift(f_cut_fft)));
     
 %% PSF
-h = imread('deg30.jpg');		% PSF filename
+lenkis = 30;
+psf_name = (['deg',num2str(lenkis),'.jpg']);
+h = imread(psf_name);		% PSF filename
 h = im2double(h);
+
+if lenkis == 0
+    lenkis = 1;
+elseif lenkis == 45
+    lenkis = lenkis + 1;
+end
 
 [hxes, hyes] = size(squeeze(h(:,:,1)));
 hxc = hxes(1)/2;
@@ -82,8 +90,7 @@ b_cut_win=(b_cut.*w12).*w12';
 b_cut_fft = fft2(b_cut_win);
 log_b_cut = log(1+abs(fftshift(b_cut_fft)));
     log_b_cut = log_b_cut - min(log_b_cut(:));
-    log_b_cut = log_b_cut / max(log_b_cut(:));
-    
+    log_b_cut = log_b_cut / max(log_b_cut(:));  
 
 theta=[0:180];
 [b_cut_rad,xp]=radon(log_b_cut,theta);
@@ -91,16 +98,27 @@ figure;
 b_cut_rad = b_cut_rad - min(b_cut_rad(:));
 b_cut_rad = b_cut_rad / max(b_cut_rad(:));
 imshow(b_cut_rad, [],'Xdata',theta,'Ydata',xp,'InitialMagnification','fit')
+axis normal
 xlabel('\theta (degrees)')
-ylabel('L')
 
 figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
-plot(-(length(b_cut_rad(:,:))-1)/2:(length(b_cut_rad(:,:))-1)/2,b_cut_rad(:,30),'LineWidth', 1.25)
-    xlim([-(length(b_cut_rad(:,:))-1)/2 (length(b_cut_rad(:,:))-1)/2])
-    xticks([-(length(b_cut_rad(:,:))-1)/2 0 (length(b_cut_rad(:,:))-1)/2])
+plot(-(length(b_cut_rad)-1)/2:(length(b_cut_rad)-1)/2,b_cut_rad(:,lenkis),'LineWidth', 1.25)
+    xlim([-(length(b_cut_rad)-1)/2 (length(b_cut_rad)-1)/2])
+    xticks([-(length(b_cut_rad)-1)/2 0 (length(b_cut_rad)-1)/2])
+    grid on, grid minor
+    ylim([0 1.1])
+    xlabel(['pixels']), ylabel('Amplitude')
+    
+N=length((b_cut_rad(:,lenkis)));
+F=fft(b_cut_rad(:,lenkis));
+    F=F-min(F);
+    F=F/max(F);
+Fr=(-N/2:N/2-1)*length(b_cut(:,1))/N;
+figure('Name', 'FFT of RT'),
+    plot(Fr,abs(fftshift(F)),'LineWidth',1.25)
+    ylim([0 1.1])
     grid on, grid minor
     xlabel(['pixels']), ylabel('Amplitude')
-
 %% ALL IMAGES TOGETHER
 
 subplot3=figure;
