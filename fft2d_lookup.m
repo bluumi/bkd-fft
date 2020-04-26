@@ -7,16 +7,6 @@ f = im2double(f);
 figure(1); imshow(f, []);
 hold on;
 
-%[xes, yes] = ginput(2);
-
-% xc = xes(1);
-% yc = yes(1);
-% halfside = max(abs(xes(2)-xc), abs(yes(2)-yc));
-%r = rectangle('Position',[xc-halfside yc-halfside 2*halfside 2*halfside]);
-%halfside = 196;                                     % iegust (izgriez) apgabalu, kura veiks FFT
-
-% f_cut = rgb2gray(f(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :));
-
 axis equal
 axis manual
 rect = imrect('PositionConstraintFcn', @(x) [x(1) x(2) min(x(3),x(4))*[1 1]]);
