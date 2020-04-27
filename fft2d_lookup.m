@@ -49,13 +49,20 @@ lenkis = input(prompt);
         lenkis = lenkis + 1;
     end
 
+gar=(-length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2-1;
+likne=f_cut_rad(:,lenkis);
+polf=polyfit(gar,likne',2);
+polv=polyval(polf,gar);
+likne=likne-polv;
+
 figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
-plot(-(length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2,f_cut_rad(:,lenkis),'LineWidth', 1.25)
+plot(gar,likne,'LineWidth', 1.25)
     xlim([-(length(f_cut_rad)-1)/2 (length(f_cut_rad)-1)/2])
     xticks([-(length(f_cut_rad)-1)/2 0 (length(f_cut_rad)-1)/2])
     grid on, grid minor
-    ylim([0 1.1])
+    %ylim([0 1.1])
     xlabel(['pixels']), ylabel('Amplitude')
+    
     
 N=length((f_cut_rad(:,lenkis)));
 F=fft(f_cut_rad(:,lenkis));
@@ -84,15 +91,6 @@ subplot(2,2,2)
 subplot(2,2,4);
     imshow(log_f_cut, []);
     title('First log-spectrum of cut-out');
-    
-%%  
-IZlenkis=4;
-figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
-plot(-(length(f_cut_rad(:,:))-1)/2:(length(f_cut_rad(:,:))-1)/2,f_cut_rad(:,IZlenkis),'LineWidth', 1.25)
-    xlim([-(length(f_cut_rad(:,:))-1)/2 (length(f_cut_rad(:,:))-1)/2])
-    xticks([-(length(f_cut_rad(:,:))-1)/2 0 (length(f_cut_rad(:,:))-1)/2])
-    grid on, grid minor
-    xlabel(['pixels']), ylabel('Amplitude')
 
 
     
