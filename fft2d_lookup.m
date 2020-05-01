@@ -91,6 +91,23 @@ subplot(2,2,2)
 subplot(2,2,4);
     imshow(log_f_cut, []);
     title('First log-spectrum of cut-out');
+    
 
+prompt2 = 'length (in px): ';
+leng = input(prompt2);
+msk = zeros(64);
+    mskx(1) = 32-leng/2;
+    mskx(2) = 32+leng/2;
+msk(32, mskx(1):mskx(2)) = ones(1,leng+1);
+msk = mat2gray(msk);
+msk = imrotate(msk,lenkis);
 
+f_crop = imcrop(f(y+1:y+h, x+1:x+w, :));
+J = deconvblind(f_crop, msk, 10);
+figure('Name', 'DCV')
+    subplot(121)
+    imshow(f_crop, []);
+    
+    subplot(122)
+    imshow(J, []);
     

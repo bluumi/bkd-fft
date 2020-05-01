@@ -54,7 +54,7 @@ h_cut=rgb2gray(h(1:hyes(1),1:hxes(1),:));
 % w12=hann(N_h)';
 % h_cut_win=(h_cut.*w12).*w12';
 
-h_cut_fft = ifft2(h_cut);
+h_cut_fft = fft2(h_cut);
 log_h_cut = log(0.25+abs(fftshift(h_cut_fft)));
 
 %% CONVOLUTED IMAGE
@@ -72,10 +72,10 @@ g(:,:,2) = imfilter(f(:,:,2), h, 'replicate');
 g(:,:,3) = imfilter(f(:,:,3), h, 'replicate');
 
 % Applying some quantization noise and white noise:
-g = g - min(min(min(g)));
-g = g / max(max(max(g)));
-g = round(g * (number_of_quantization_levels - 1)) / (number_of_quantization_levels - 1);
-g = g + randn(size(g)) * noise_energy;
+% g = g - min(min(min(g)));
+% g = g / max(max(max(g)));
+% g = round(g * (number_of_quantization_levels - 1)) / (number_of_quantization_levels - 1);
+% g = g + randn(size(g)) * noise_energy;
 
 
 bb = add_mask_to_image(g, []);
@@ -145,3 +145,6 @@ subplot(2,3,3);
     
 subplot(2,3,6);
     imshow(log_b_cut, []);
+
+[J P] = deconvblind(bb, h_cut, 10); % It depends on iterations to have more precise DECONV
+figure('Name','DCV'), subplot(121),imshow(f,[]), subplot(122), imshow(J, [])
