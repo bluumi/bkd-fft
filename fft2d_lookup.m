@@ -1,7 +1,7 @@
 clear all
 close all
 
-f = imread('vwdrive.jpg');
+f = imread('skyline.jpg');
 f = im2double(f);
 
 figure(1); imshow(f, []);
@@ -51,9 +51,9 @@ lenkis = input(prompt);
 
 gar=(-length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2-1;
 likne=f_cut_rad(:,lenkis);
-polf=polyfit(gar,likne',2);
-polv=polyval(polf,gar);
-likne=likne-polv;
+% polf=polyfit(gar,likne',2);
+% polv=polyval(polf,gar);
+% likne=likne-polv;
 
 figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
 plot(gar,likne,'LineWidth', 1.25)
@@ -102,12 +102,15 @@ msk(32, mskx(1):mskx(2)) = ones(1,leng+1);
 msk = mat2gray(msk);
 msk = imrotate(msk,lenkis);
 
-f_crop = imcrop(f(y+1:y+h, x+1:x+w, :));
-J = deconvblind(f_crop, msk, 10);
+f_crop = imcrop(f, [x y w h]);
+
+[J P] = deconvblind(f_crop, msk, 8, sqrt(0.001));
 figure('Name', 'DCV')
     subplot(121)
     imshow(f_crop, []);
     
     subplot(122)
     imshow(J, []);
+    
+figure(),imshow(P,[]);
     

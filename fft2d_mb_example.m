@@ -21,8 +21,6 @@ halfside = 96;     % iegust (izgriez) apgabalu, kura veiks FFT
 
 
 f_cut = rgb2gray(f(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :));
-%figure;
-    %imshow(f_cut, []);
     N=length(f_cut);
     
 w12=hann(N)';
@@ -33,9 +31,13 @@ log_f_cut = log(1+abs(fftshift(f_cut_fft)));
     
 %% PSF
 lenkis = 30;
-psf_name = (['deg',num2str(lenkis),'.jpg']);
-h = imread(psf_name);		% PSF filename
-h = im2double(h);
+
+h = fspecial('motion',20,lenkis);
+h_cut = zeros(64);
+sz = size(h_cut);
+sb = size(h);
+hh = floor((sz - sb)/2)+1;
+h_cut(hh(1)+(0:sb(1)-1),hh(2)+(0:sb(2)-1)) = h*50;
 
 if lenkis == 0
     lenkis = 1;
@@ -43,33 +45,16 @@ elseif lenkis == 45
     lenkis = lenkis + 1;
 end
 
-[hxes, hyes] = size(squeeze(h(:,:,1)));
-hxc = hxes(1)/2;
-hyc = hyes(1)/2;
-
-%h_cut = rgb2gray(h(hyc-halfside/2+1:hyc+halfside/2, hxc-halfside/2+1:hxc+halfside/2, :));
-h_cut=rgb2gray(h(1:hyes(1),1:hxes(1),:));
-    N_h=length(h_cut);
-    
-% w12=hann(N_h)';
-% h_cut_win=(h_cut.*w12).*w12';
-
 h_cut_fft = fft2(h_cut);
 log_h_cut = log(0.25+abs(fftshift(h_cut_fft)));
 
 %% CONVOLUTED IMAGE
 % Specify distortion parameters:
-number_of_quantization_levels = 2^16;
-noise_energy = 0.0; % use range 0 to 1
-
-h = (h(:,:,1) + h(:,:,2) + h(:,:,3)) / 3;
-yhc = ceil(size(h,1)/2);
-xhc = ceil(size(h,2)/2);
+% number_of_quantization_levels = 2^16;
+% noise_energy = 0.0; % use range 0 to 1
 
 g = zeros(size(f));
-g(:,:,1) = imfilter(f(:,:,1), h, 'replicate');
-g(:,:,2) = imfilter(f(:,:,2), h, 'replicate');
-g(:,:,3) = imfilter(f(:,:,3), h, 'replicate');
+g = imfilter(f, h, 'replicate');
 
 % Applying some quantization noise and white noise:
 % g = g - min(min(min(g)));
@@ -146,5 +131,8 @@ subplot(2,3,3);
 subplot(2,3,6);
     imshow(log_b_cut, []);
 
-[J P] = deconvblind(bb, h_cut, 10); % It depends on iterations to have more precise DECONV
+%% DECONV
+
+bb = edgetaper(bb, h_cut);    
+[J P] = deconvblind(rgb2gray(bb), h_cut, 30); % It depends on iterations to have more precise DECONV
 figure('Name','DCV'), subplot(121),imshow(f,[]), subplot(122), imshow(J, [])
