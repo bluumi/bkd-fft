@@ -8,6 +8,7 @@ close all
 %% Original Image
 f = imread('f1_car.jpg');
 f = im2double(f);
+f = rgb2gray(f);
 
 figure; imshow(f, []);
 
@@ -19,8 +20,7 @@ yc = yes(1)/2-128;
 %halfside = max(abs(xes(2)-xc), abs(yes(2)-yc));
 halfside = 96;     % iegust (izgriez) apgabalu, kura veiks FFT
 
-
-f_cut = rgb2gray(f(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :));
+f_cut = f(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :);
     N=length(f_cut);
     
 w12=hann(N)';
@@ -30,9 +30,12 @@ f_cut_fft = fft2(f_cut_win);
 log_f_cut = log(1+abs(fftshift(f_cut_fft)));
     
 %% PSF
-lenkis = 30;
+prompt = 'PSF garums: ';
+garums = input(prompt);
+prompt2 = 'PSF lenkis: ';
+lenkis = input(prompt2);
 
-h = fspecial('motion',20,lenkis);
+h = fspecial('motion',garums,lenkis);
 h_cut = zeros(64);
 sz = size(h_cut);
 sb = size(h);
@@ -66,7 +69,7 @@ g = imfilter(f, h, 'replicate');
 bb = add_mask_to_image(g, []);
 figure; imshow(bb, []);
 
-b_cut = rgb2gray(bb(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :));
+b_cut = bb(yc-halfside+1:yc+halfside, xc-halfside+1:xc+halfside, :);
     N_b=length(b_cut);
     
 w12=hann(N_b)';
@@ -134,5 +137,5 @@ subplot(2,3,6);
 %% DECONV
 
 bb = edgetaper(bb, h_cut);    
-[J P] = deconvblind(rgb2gray(bb), h_cut, 30); % It depends on iterations to have more precise DECONV
+J = deconvlucy(bb, h_cut, 30); % It depends on iterations to have more precise DECONV
 figure('Name','DCV'), subplot(121),imshow(f,[]), subplot(122), imshow(J, [])

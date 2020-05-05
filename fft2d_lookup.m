@@ -41,16 +41,16 @@ axis normal
 xlabel('\theta (degrees)')
 ylabel('L')
 
-prompt = 'izpluduma lenkis: ';
-lenkis = input(prompt);
-    if lenkis == 0
-        lenkis = 1;
-    elseif lenkis == 45
-        lenkis = lenkis + 1;
+prompt = 'PSF theta: ';
+THETA = input(prompt);
+    if THETA == 0
+        THETA = 1;
+    elseif THETA == 45
+        THETA = THETA + 1;
     end
 
 gar=(-length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2-1;
-likne=f_cut_rad(:,lenkis);
+likne=f_cut_rad(:,THETA);
 % polf=polyfit(gar,likne',2);
 % polv=polyval(polf,gar);
 % likne=likne-polv;
@@ -64,8 +64,8 @@ plot(gar,likne,'LineWidth', 1.25)
     xlabel(['pixels']), ylabel('Amplitude')
     
     
-N=length((f_cut_rad(:,lenkis)));
-F=fft(f_cut_rad(:,lenkis));
+N=length((f_cut_rad(:,THETA)));
+F=fft(f_cut_rad(:,THETA));
     F=F-min(F);
     F=F/max(F);
 Fr=(-N/2:N/2-1)*length(f_cut(:,1))/N;
@@ -94,23 +94,22 @@ subplot(2,2,4);
     
 
 prompt2 = 'length (in px): ';
-leng = input(prompt2);
-msk = zeros(64);
-    mskx(1) = 32-leng/2;
-    mskx(2) = 32+leng/2;
-msk(32, mskx(1):mskx(2)) = ones(1,leng+1);
-msk = mat2gray(msk);
-msk = imrotate(msk,lenkis);
+LEN = input(prompt2);
+PSF = fspecial('motion',LEN,THETA);
+b_cut = zeros(LEN+64);
+sz = size(b_cut);
+sb = size(PSF);
+bb = floor((sz - sb)/2)+1;
+b_cut(bb(1)+(0:sb(1)-1),bb(2)+(0:sb(2)-1)) = PSF;
+msk_att = b_cut*50;
 
 f_crop = imcrop(f, [x y w h]);
-
-[J P] = deconvblind(f_crop, msk, 8, sqrt(0.001));
+f_crop = edgetaper(f_crop, PSF);
+J = deconvlucy(f_crop, PSF);
 figure('Name', 'DCV')
     subplot(121)
     imshow(f_crop, []);
     
     subplot(122)
     imshow(J, []);
-    
-figure(),imshow(P,[]);
     
