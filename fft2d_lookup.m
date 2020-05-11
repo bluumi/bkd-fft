@@ -1,8 +1,12 @@
 clear all
 close all
 
-f = imread('skyline.jpg');
-f = im2double(f);
+load canonParams.mat
+
+f = imread('2020_05_10\IMG_0014.jpg');
+[f, newOrigin] = undistortImage(f, cameraParams);
+f = imresize(f, 0.5);
+f = im2double(rgb2gray(f));
 
 figure(1); imshow(f, []);
 hold on;
@@ -17,7 +21,7 @@ y = p(1,2);
 w = p(1,3);
 h = p(1,4);
 
-f_cut = rgb2gray(f(y+1:y+h, x+1:x+w, :));
+f_cut = f(y+1:y+h, x+1:x+w, :);
     N=length(f_cut);
 
 f_cut = f_cut - mean(f_cut(:));
@@ -96,20 +100,33 @@ subplot(2,2,4);
 prompt2 = 'length (in px): ';
 LEN = input(prompt2);
 PSF = fspecial('motion',LEN,THETA);
-b_cut = zeros(LEN+64);
-sz = size(b_cut);
-sb = size(PSF);
-bb = floor((sz - sb)/2)+1;
-b_cut(bb(1)+(0:sb(1)-1),bb(2)+(0:sb(2)-1)) = PSF;
-msk_att = b_cut*50;
+% b_cut = zeros(LEN+64);
+% sz = size(b_cut);
+% sb = size(PSF);
+% bb = floor((sz - sb)/2)+1;
+% b_cut(bb(1)+(0:sb(1)-1),bb(2)+(0:sb(2)-1)) = PSF;
+% msk_att = b_cut*50;
 
-f_crop = imcrop(f, [x y w h]);
+f_crop = imcrop(f, [x y w-1 h-1]);
 f_crop = edgetaper(f_crop, PSF);
-J = deconvlucy(f_crop, PSF);
+
+INITPSF=ones(size(PSF));
+
+[J, P] = deconvblind(f_crop, INITPSF, 200, 10*sqrt(1e-9));
+
+P1 = P;
+P1(find(P1 < 0.005)) = 0;
+
+J2 = deconvlucy(f_crop, P1, 200);
+
 figure('Name', 'DCV')
-    subplot(121)
+    subplot(131)
     imshow(f_crop, []);
     
-    subplot(122)
+    subplot(132)
     imshow(J, []);
+    
+    subplot(133)
+    imshow(medfilt2(imadjust(J2)), []);
+
     
