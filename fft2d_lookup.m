@@ -3,9 +3,18 @@ close all
 
 load canonParams.mat
 
-f = imread('2020_05_10\IMG_0014.jpg');
-[f, newOrigin] = undistortImage(f, cameraParams);
-f = imresize(f, 0.5);
+f = imread('2020_05_10/IMG_0014.jpg');
+
+prompt = 'Undistort image? (Y=1/N=0)';
+distfl = input(prompt);
+
+if distfl == 1
+    [f, newOrigin] = undistortImage(f, cameraParams);
+end
+
+if length(f)>2000
+    f = imresize(f, 0.5);
+end
 f = im2double(rgb2gray(f));
 
 figure(1); imshow(f, []);
@@ -55,9 +64,6 @@ THETA = input(prompt);
 
 gar=(-length(f_cut_rad)-1)/2:(length(f_cut_rad)-1)/2-1;
 likne=f_cut_rad(:,THETA);
-% polf=polyfit(gar,likne',2);
-% polv=polyval(polf,gar);
-% likne=likne-polv;
 
 figure('Name', 'Radona transformacijas likne kustibas izpludumam'),
 plot(gar,likne,'LineWidth', 1.25)
@@ -96,37 +102,20 @@ subplot(2,2,4);
     imshow(log_f_cut, []);
     title('First log-spectrum of cut-out');
     
-
 prompt2 = 'length (in px): ';
 LEN = input(prompt2);
 PSF = fspecial('motion',LEN,THETA);
-% b_cut = zeros(LEN+64);
-% sz = size(b_cut);
-% sb = size(PSF);
-% bb = floor((sz - sb)/2)+1;
-% b_cut(bb(1)+(0:sb(1)-1),bb(2)+(0:sb(2)-1)) = PSF;
-% msk_att = b_cut*50;
 
 f_crop = imcrop(f, [x y w-1 h-1]);
 f_crop = edgetaper(f_crop, PSF);
 
-INITPSF=ones(size(PSF));
-
-[J, P] = deconvblind(f_crop, INITPSF, 200, 10*sqrt(1e-9));
-
-P1 = P;
-P1(find(P1 < 0.005)) = 0;
-
-J2 = deconvlucy(f_crop, P1, 200);
+J = deconvlucy(f_crop, PSF, 200, 10*sqrt(1e-9));
 
 figure('Name', 'DCV')
-    subplot(131)
+    subplot(121)
     imshow(f_crop, []);
     
-    subplot(132)
-    imshow(J, []);
-    
-    subplot(133)
-    imshow(medfilt2(imadjust(J2)), []);
+    subplot(122)
+    imshow(medfilt2(J), []);
 
     
