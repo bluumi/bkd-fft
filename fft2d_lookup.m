@@ -3,19 +3,18 @@ close all
 
 load canonParams.mat
 
+ref = imread('2020_05_10/IMG_0022.jpg'); %% kontrasts un histograma
+
 f = imread('2020_05_10/IMG_0014.jpg');
-
-prompt = 'Undistort image? (Y=1/N=0)';
-distfl = input(prompt);
-
-if distfl == 1
-    [f, newOrigin] = undistortImage(f, cameraParams);
-end
+f = imhistmatch(f, ref);
+[f, newOrigin] = undistortImage(f, cameraParams);
+% f = imread('vwdrive.jpg');
+f=rgb2gray(f);
 
 if length(f)>2000
-    f = imresize(f, 0.5);
+    f = imresize(f, [NaN 2000]);
 end
-f = im2double(rgb2gray(f));
+f = im2double(f);
 
 figure(1); imshow(f, []);
 hold on;
@@ -53,6 +52,8 @@ imshow(f_cut_rad, [],'Xdata',theta,'Ydata',xp,'InitialMagnification','fit')
 axis normal
 xlabel('\theta (degrees)')
 ylabel('L')
+
+hold off
 
 prompt = 'PSF theta: ';
 THETA = input(prompt);

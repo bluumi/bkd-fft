@@ -58,6 +58,7 @@ log_h_cut = log(0.25+abs(fftshift(h_cut_fft)));
 
 g = zeros(size(f));
 g = imfilter(f, h, 'replicate');
+g = imnoise(g, 'gaussian', 0, 0.0005);
 
 % Applying some quantization noise and white noise:
 % g = g - min(min(min(g)));
@@ -137,5 +138,5 @@ subplot(2,3,6);
 %% DECONV
 
 bb = edgetaper(bb, h_cut);    
-J = deconvlucy(bb, h_cut, 30); % It depends on iterations to have more precise DECONV
+J = deconvlucy(bb, h_cut, 200, 10*sqrt(1e-9)); % It depends on iterations to have more precise DECONV
 figure('Name','DCV'), subplot(121),imshow(f,[]), subplot(122), imshow(J, [])
