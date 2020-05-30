@@ -3,6 +3,11 @@ close all
 
 fIDn = fopen('2020_05_30-NOISE.txt');
 fIDrec = fopen('2020_05_30-M4.txt');
+x=1186;
+deg = 25; %% PARALELI CELAM!
+shutter=1/100;
+h_dist = 2.3;
+
 noise = textscan(fIDn, '%s','delimiter','\n');
     noise = str2double(noise{1});
 recData = textscan(fIDrec, '%s','delimiter','\n');
@@ -34,10 +39,6 @@ fov18 = 66;
 % prompt6 = 'Approx. angle, parallel to road: ';
 % deg = input(prompt6);
 
-shutter=1/100;
-h_dist = 2.28;
-deg = 25;
-
 fdop = loc*4.46;
 c = 299792458; % m/s
 f0=24.125e9;
@@ -59,6 +60,7 @@ else
     sensor_blur = distance/m_px;
 %     sensor_blur = (distance*fcl)/(px_size*dist_to_obj);
 %     sensor_blur = sensor_blur*m_px;
+    sensor_blur = sensor_blur*(2.1^(-2+x/500));
     sensor_blur = round(sensor_blur);
 end
 
